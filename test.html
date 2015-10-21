@@ -1,0 +1,66 @@
+<!DOCTYPE HTML>
+<title>OpenLayers Simplest Example</title>
+<div id="demoMap" style="height:750px"></div>
+<script src="OpenLayers.js"></script>
+<script>
+
+    map = new OpenLayers.Map("demoMap", {
+        projection: new OpenLayers.Projection("EPSG:3857"),
+        units: "m",
+        maxResolution: 156543.0339,
+        maxExtent: new OpenLayers.Bounds(
+                -20037508, -20037508, 20037508, 20037508.34),
+        displayProjection: new OpenLayers.Projection("EPSG:4326"),
+        controls: [
+            new OpenLayers.Control.Navigation(),
+            new OpenLayers.Control.KeyboardDefaults(),
+            new OpenLayers.Control.PanZoomBar(),
+            new OpenLayers.Control.Scale(),
+            new OpenLayers.Control.Attribution()
+        ]
+
+    });
+    var Imin_supf = 100000;
+    var Imax_supf = 200000;
+
+    var client = new OpenLayers.WPSClient({
+        servers: {
+            dotgee: 'http://localhost:8080/geoserver/wps'
+        }/*,
+         responseForm: {
+         RawDataOutput : {
+         identifier : 'result',
+         mimeType : 'text/xml',
+         subtype : 'wfs-collection/1.0'}
+         }*/
+    });
+
+
+    /*script = client.getProcess('dotgee', 'js:script');
+     script.configure({
+     inputs : {
+     "min_supf" : Imin_supf,
+     "max_supf" : Imax_supf}
+     });*/
+
+    client.execute ({
+        server: 'dotgee',
+        process: "js:script",
+        DataInputs :
+            {Input :
+                {Identifier : "min_supf",
+                 Data :
+                    {LiteralData : "100000"}}},
+
+        ResponseForm : {
+          RawDataOutput :
+            {
+                mimetype : "application/json",
+                Identifier : "result"}},
+
+
+    success: function(outputs) {
+        alert(outputs.result.toString());
+        map.baseLayer.addFeatures(outputs.result);
+    }});
+</script>
